@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AeroSurrogate</title>
+<style>
+  :root {
+    --bg: #f7f8fa; --panel: #ffffff; --ink: #11161d; --muted: #5b6672;
+    --line: #dde2e8; --accent: #1f77b4; --accent-soft: #1f77b433;
+    --truth: #d62728; --ok: #137a4b; --ok-bg: #e4f4ec;
+    --warn: #8a5300; --warn-bg: #fdf0da; --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11151a; --panel: #181d24; --ink: #e8edf3; --muted: #93a1b0;
+      --line: #2a323c; --accent: #4da3dd; --accent-soft: #4da3dd3d;
+      --truth: #ff6b6b; --ok: #4ad08a; --ok-bg: #12301f;
+      --warn: #ffc46b; --warn-bg: #352713;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 20px; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  header { max-width: 1180px; margin: 0 auto 16px; }
+  h1 { font-size: 21px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .layout {
+    max-width: 1180px; margin: 0 auto; display: grid; gap: 16px;
+    grid-template-columns: 330px 1fr;
+  }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px;
+  }
+  .panel h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--muted); margin: 0 0 12px; font-weight: 600;
+  }
+  label { display: block; font-size: 12.5px; color: var(--muted); margin: 12px 0 3px; }
+  .row { display: flex; align-items: center; gap: 9px; }
+  input[type=range] { flex: 1; accent-color: var(--accent); min-width: 0; }
+  input[type=number] {
+    width: 74px; padding: 4px 6px; font: 13px var(--mono); text-align: right;
+    background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 5px;
+  }
+  select, button {
+    width: 100%; padding: 7px 8px; font: 13px system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+  }
+  button:hover, select:hover { border-color: var(--accent); }
+  .seg { display: flex; gap: 6px; }
+  .seg button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .readout { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-end; }
+  .metric .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .metric .v { font: 600 30px/1.15 var(--mono); letter-spacing: -0.02em; }
+  .metric .s { font-size: 11.5px; color: var(--muted); font-family: var(--mono); }
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 99px;
+    font-size: 11.5px; font-weight: 600; margin-top: 10px;
+  }
+  .badge.ok { background: var(--ok-bg); color: var(--ok); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); }
+  .truth {
+    margin-top: 11px; padding: 9px 11px; border-radius: 7px;
+    background: var(--bg); border: 1px solid var(--line);
+    font-size: 12.5px; font-family: var(--mono);
+  }
+  .truth b { color: var(--truth); }
+  svg { display: block; width: 100%; height: auto; }
+  .ax { stroke: var(--line); stroke-width: 1; }
+  .gr { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; opacity: .65; }
+  .tx { fill: var(--muted); font-size: 10.5px; font-family: var(--mono); }
+  .foil { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.6; }
+  .curve { fill: none; stroke: var(--accent); stroke-width: 2.4; }
+  .band { fill: var(--accent-soft); }
+  .theory { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 5 4; }
+  .legend { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  .legend span { margin-right: 14px; white-space: nowrap; }
+  .sw { display: inline-block; width: 11px; height: 2.5px; vertical-align: middle; margin-right: 4px; }
+  footer { max-width: 1180px; margin: 16px auto 0; color: var(--muted); font-size: 11.5px; }
+  #err {
+    display: none; margin: 0 auto 12px; max-width: 1180px; padding: 9px 12px;
+    border-radius: 7px; background: var(--warn-bg); color: var(--warn); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AeroSurrogate</h1>
+  <p>Lift and drag coefficients for a NACA airfoil, predicted in under a millisecond
+     instead of a 25-minute RANS simulation.</p>
+</header>
+
+<div id="err"></div>
+
+<div class="layout">
+  <div class="panel">
+    <h2>Airfoil</h2>
+    <div class="seg">
+      <button id="s4" class="on" onclick="setSeries(4)">4-digit</button>
+      <button id="s5" onclick="setSeries(5)">5-digit</button>
+    </div>
+    <div id="params"></div>
+
+    <h2 style="margin-top:20px">Flow</h2>
+    <label>Angle of attack &mdash; <span id="aoaLbl" style="font-family:var(--mono)"></span>&deg;</label>
+    <div class="row">
+      <input type="range" id="aoa" min="-8" max="18" step="0.1" value="4">
+      <input type="number" id="aoaN" step="0.1" value="4">
+    </div>
+    <label>Reynolds number &mdash; <span id="reLbl" style="font-family:var(--mono)"></span></label>
+    <div class="row">
+      <input type="range" id="re" min="1.5" max="7" step="0.05" value="3">
+      <input type="number" id="reN" step="0.05" value="3">
+    </div>
+
+    <h2 style="margin-top:20px">Compare with CFD</h2>
+    <select id="cases"><option value="">Load a held-out test simulation&hellip;</option></select>
+    <p style="font-size:11.5px;color:var(--muted);margin:9px 0 0">
+      Pick one to snap every control to a real AirfRANS case, then drag the angle
+      away and watch the ground-truth marker detach.
+    </p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+    <div class="panel">
+      <div class="readout">
+        <div class="metric">
+          <div class="k">Lift C<sub>l</sub></div>
+          <div class="v" id="clV">&mdash;</div>
+          <div class="s" id="clS"></div>
+        </div>
+        <div class="metric">
+          <div class="k">Drag C<sub>d</sub></div>
+          <div class="v" id="cdV">&mdash;</div>
+          <div class="s" id="cdS"></div>
+        </div>
+        <div class="metric">
+          <div class="k">L/D</div>
+          <div class="v" id="ldV">&mdash;</div>
+        </div>
+        <div class="metric">
+          <div class="k">Inference</div>
+          <div class="v" id="msV">&mdash;</div>
+          <div class="s">milliseconds, CPU</div>
+        </div>
+      </div>
+      <span class="badge ok" id="badge">&nbsp;</span>
+      <div class="truth" id="truth" style="display:none"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Section</h2>
+      <svg id="foilSvg" viewBox="0 0 700 150" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="panel">
+      <h2>Lift curve</h2>
+      <svg id="curveSvg" viewBox="0 0 700 330" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--accent)"></i>AeroSurrogate</span>
+        <span><i class="sw" style="background:var(--accent-soft);height:9px"></i>ensemble spread (2&sigma;)</span>
+        <span><i class="sw" style="background:var(--muted)"></i>thin-airfoil theory</span>
+        <span><i class="sw" style="background:var(--truth);height:9px"></i>CFD ground truth</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer id="foot"></footer>
+
+<script>
+const SLOPE = 2 * Math.PI * Math.PI / 180;   // thin-airfoil lift slope, per degree
+let series = 4;
+let P = { 4: [2, 4, 12], 5: [2, 3, 0, 12] };
+let sweep = null, meta = null, cases = [], current = null;
+let inflight = null;
+
+const $ = id => document.getElementById(id);
+const naca = () => P[series].slice();
+
+const SPECS = {
+  4: [["M", "max camber (% chord)", 0, 9, 0.01],
+      ["P", "position of max camber (tenths)", 0, 9, 0.01],
+      ["XX", "thickness (% chord)", 4, 30, 0.01]],
+  5: [["L", "design-lift code", 0, 6, 0.01],
+      ["P", "camber position (twentieths)", 1, 8, 0.01],
+      ["Q", "0 = normal, 1 = reflex", 0, 1, 1],
+      ["XX", "thickness (% chord)", 4, 30, 0.01]]
+};
+
+function buildParams() {
+  $("params").innerHTML = SPECS[series].map(([n, d, lo, hi, st], i) => `
+    <label>${n} &mdash; ${d}</label>
+    <div class="row">
+      <input type="range" id="p${i}" min="${lo}" max="${hi}" step="${st}" value="${P[series][i]}">
+      <input type="number" id="p${i}n" min="${lo}" max="${hi}" step="${st}" value="${P[series][i]}">
+    </div>`).join("");
+  SPECS[series].forEach((_, i) => link(`p${i}`, `p${i}n`, v => { P[series][i] = v; refresh(); }));
+}
+
+function link(rangeId, numId, onChange) {
+  const r = $(rangeId), n = $(numId);
+  const push = src => {
+    let v = parseFloat(src.value);
+    if (!isFinite(v)) return;
+    r.value = v; n.value = v;
+    onChange(parseFloat(r.value));
+  };
+  r.addEventListener("input", () => push(r));
+  n.addEventListener("change", () => push(n));
+}
+
+function setSeries(s) {
+  series = s;
+  $("s4").className = s === 4 ? "on" : "";
+  $("s5").className = s === 5 ? "on" : "";
+  buildParams();
+  refresh();
+}
+
+function showError(msg) {
+  const e = $("err");
+  if (!msg) { e.style.display = "none"; return; }
+  e.textContent = msg;
+  e.style.display = "block";
+}
+
+async function post(url, body, signal) {
+  const r = await fetch(url, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body), signal
+  });
+  if (!r.ok) throw new Error((await r.json()).detail?.[0]?.msg || `HTTP ${r.status}`);
+  return r.json();
+}
+
+// -- rendering --------------------------------------------------------------
+
+function drawFoil(x, y) {
+  const W = 700, H = 150, pad = 18;
+  const sx = v => pad + v * (W - 2 * pad);
+  const sy = v => H / 2 - v * (W - 2 * pad);
+  const d = x.map((v, i) => `${i ? "L" : "M"}${sx(v).toFixed(1)},${sy(y[i]).toFixed(1)}`).join("") + "Z";
+  $("foilSvg").innerHTML =
+    `<line class="gr" x1="${sx(0)}" y1="${H / 2}" x2="${sx(1)}" y2="${H / 2}"/>
+     <path class="foil" d="${d}"/>
+     <text class="tx" x="${sx(0)}" y="${H - 4}">x/c = 0</text>
+     <text class="tx" x="${sx(1) - 46}" y="${H - 4}">x/c = 1</text>`;
+}
+
+function drawCurve() {
+  if (!sweep) return;
+  const W = 700, H = 330, L = 52, R = 14, T = 14, B = 34;
+  const xs = sweep.aoa_deg, ys = sweep.cl;
+  const lo = Math.min(...ys.map((v, i) => v - 2 * sweep.cl_std[i])) - 0.08;
+  const hi = Math.max(...ys.map((v, i) => v + 2 * sweep.cl_std[i])) + 0.08;
+  const x0 = xs[0], x1 = xs[xs.length - 1];
+  const sx = v => L + (v - x0) / (x1 - x0) * (W - L - R);
+  const sy = v => H - B - (v - lo) / (hi - lo) * (H - T - B);
+
+  let g = "";
+  for (let a = Math.ceil(x0 / 5) * 5; a <= x1; a += 5)
+    g += `<line class="gr" x1="${sx(a)}" y1="${T}" x2="${sx(a)}" y2="${H - B}"/>
+          <text class="tx" x="${sx(a) - 7}" y="${H - B + 15}">${a}</text>`;
+  const step = (hi - lo) > 2 ? 0.5 : 0.25;
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step)
+    g += `<line class="gr" x1="${L}" y1="${sy(v)}" x2="${W - R}" y2="${sy(v)}"/>
+          <text class="tx" x="6" y="${sy(v) + 3.5}">${v.toFixed(2)}</text>`;
+
+  const band = xs.map((a, i) => `${sx(a).toFixed(1)},${sy(ys[i] + 2 * sweep.cl_std[i]).toFixed(1)}`)
+    .concat(xs.map((a, i) => `${sx(a).toFixed(1)},${sy(ys[i] - 2 * sweep.cl_std[i]).toFixed(1)}`).reverse())
+    .join(" ");
+  const line = xs.map((a, i) => `${i ? "L" : "M"}${sx(a).toFixed(1)},${sy(ys[i]).toFixed(1)}`).join("");
+
+  // Thin-airfoil reference, anchored at the model's own zero-lift angle so the
+  // comparison is of slope, not offset.
+  let z = 0;
+  for (let i = 1; i < ys.length; i++)
+    if (ys[i - 1] <= 0 && ys[i] > 0) z = xs[i - 1] + (xs[i] - xs[i - 1]) * (-ys[i - 1]) / (ys[i] - ys[i - 1]);
+  const th = `M${sx(x0)},${sy(SLOPE * (x0 - z))}L${sx(x1)},${sy(SLOPE * (x1 - z))}`;
+
+  // Shade the region outside the training envelope.
+  let shade = "";
+  const outs = sweep.in_range.map((ok, i) => ok ? null : xs[i]).filter(v => v !== null);
+  if (outs.length) {
+    const lefts = outs.filter(v => v < 0), rights = outs.filter(v => v >= 0);
+    if (lefts.length) shade += `<rect x="${sx(x0)}" y="${T}" width="${sx(Math.max(...lefts)) - sx(x0)}" height="${H - T - B}" fill="var(--warn-bg)" opacity=".55"/>`;
+    if (rights.length) shade += `<rect x="${sx(Math.min(...rights))}" y="${T}" width="${sx(x1) - sx(Math.min(...rights))}" height="${H - T - B}" fill="var(--warn-bg)" opacity=".55"/>`;
+  }
+
+  const a = parseFloat($("aoa").value);
+  const i = Math.round((a - x0) / (x1 - x0) * (xs.length - 1));
+  const dot = (i >= 0 && i < xs.length)
+    ? `<circle cx="${sx(a)}" cy="${sy(ys[i])}" r="5.5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/>` : "";
+
+  let truth = "";
+  if (current) {
+    const cx = sx(current.aoa_deg), cy = sy(current.cl);
+    truth = `<g stroke="var(--truth)" stroke-width="2.6">
+       <line x1="${cx - 7}" y1="${cy - 7}" x2="${cx + 7}" y2="${cy + 7}"/>
+       <line x1="${cx - 7}" y1="${cy + 7}" x2="${cx + 7}" y2="${cy - 7}"/></g>`;
+  }
+
+  $("curveSvg").innerHTML = `${shade}${g}
+    <polygon class="band" points="${band}"/>
+    <path class="theory" d="${th}"/><path class="curve" d="${line}"/>${truth}${dot}
+    <line class="ax" x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}"/>
+    <line class="ax" x1="${L}" y1="${T}" x2="${L}" y2="${H - B}"/>
+    <text class="tx" x="${(W + L) / 2 - 46}" y="${H - 4}">angle of attack (deg)</text>`;
+}
+
+// -- data flow --------------------------------------------------------------
+
+async function refresh() {
+  $("aoaLbl").textContent = (+$("aoa").value).toFixed(1);
+  $("reLbl").textContent = (+$("re").value).toFixed(2) + " x 10^6";
+  const params = naca(), re = parseFloat($("re").value) * 1e6;
+
+  if (inflight) inflight.abort();
+  inflight = new AbortController();
+  const signal = inflight.signal;
+
+  try {
+    const [sw, geo, pr] = await Promise.all([
+      post("/sweep", { naca: params, reynolds: re, aoa_min: -8, aoa_max: 18, n: 131 }, signal),
+      fetch(`/geometry?naca_params=${params.join(",")}`, { signal }).then(r => r.json()),
+      post("/predict", { naca: params, aoa_deg: parseFloat($("aoa").value), reynolds: re }, signal)
+    ]);
+    showError("");
+    sweep = sw;
+    drawFoil(geo.x, geo.y);
+    drawCurve();
+    render(pr);
+  } catch (e) {
+    if (e.name !== "AbortError") showError("API error: " + e.message);
+  }
+}
+
+function render(p) {
+  $("clV").textContent = p.cl.toFixed(3);
+  $("cdV").textContent = p.cd.toFixed(5);
+  $("ldV").textContent = (p.cl / p.cd).toFixed(1);
+  $("msV").textContent = p.inference_ms.toFixed(2);
+  $("clS").textContent = "+/- " + p.cl_std.toFixed(3);
+  $("cdS").textContent = "+/- " + p.cd_std.toFixed(5);
+
+  const b = $("badge");
+  if (p.extrapolation.in_range) {
+    b.className = "badge ok";
+    b.textContent = "within the training envelope";
+  } else {
+    b.className = "badge warn";
+    b.textContent = "extrapolating -- " + p.extrapolation.warnings[0];
+  }
+
+  const t = $("truth");
+  if (p.reference) {
+    t.style.display = "block";
+    t.innerHTML =
+      `<b>CFD ground truth</b> &mdash; ${p.reference.name}<br>` +
+      `Cl ${p.reference.cl.toFixed(4)} vs ${p.cl.toFixed(4)} predicted ` +
+      `(${(p.cl - p.reference.cl >= 0 ? "+" : "") + (p.cl - p.reference.cl).toFixed(4)})<br>` +
+      `Cd ${p.reference.cd.toFixed(5)} vs ${p.cd.toFixed(5)} predicted ` +
+      `(${((p.cd - p.reference.cd) / p.reference.cd * 100).toFixed(2)}%)`;
+  } else {
+    t.style.display = "none";
+  }
+}
+
+function loadCase(name) {
+  const c = cases.find(x => x.name === name);
+  current = c || null;
+  if (!c) { refresh(); return; }
+  series = c.naca.length === 4 ? 5 : 4;
+  P[series] = c.naca.slice();
+  $("s4").className = series === 4 ? "on" : "";
+  $("s5").className = series === 5 ? "on" : "";
+  buildParams();
+  $("aoa").value = $("aoaN").value = c.aoa_deg.toFixed(1);
+  $("re").value = $("reN").value = (c.reynolds / 1e6).toFixed(2);
+  refresh();
+}
+
+(async function init() {
+  buildParams();
+  link("aoa", "aoaN", () => { $("aoaLbl").textContent = (+$("aoa").value).toFixed(1); refresh(); });
+  link("re", "reN", refresh);
+  $("cases").addEventListener("change", e => loadCase(e.target.value));
+
+  try {
+    meta = await (await fetch("/meta")).json();
+    cases = await (await fetch("/test-cases")).json();
+    $("cases").innerHTML = '<option value="">Load a held-out test simulation&hellip;</option>' +
+      cases.map(c => `<option value="${c.name}">${c.label} &middot; ${c.aoa_deg.toFixed(1)}deg &middot; Re ${(c.reynolds / 1e6).toFixed(2)}M</option>`).join("");
+    const r = meta.input_ranges;
+    $("foot").textContent =
+      `Model: ${meta.arch.hidden.join("x")} MLP, ${meta.arch.n_parameters.toLocaleString()} parameters, ` +
+      `trained on ${meta.trained_on.n_train} AirfRANS simulations (${meta.trained_on.task} task). ` +
+      `Training envelope: AoA ${r.aoa_deg[0].toFixed(1)} to ${r.aoa_deg[1].toFixed(1)} deg, ` +
+      `thickness ${(r.max_thickness[0] * 100).toFixed(1)} to ${(r.max_thickness[1] * 100).toFixed(1)}% chord. ` +
+      `Inference time is ${meta.inference_ms_definition}.`;
+  } catch (e) {
+    showError("Could not reach the API. Start it with:  uvicorn api:app");
+  }
+  refresh();
+})();
+</script>
+</body>
+</html>

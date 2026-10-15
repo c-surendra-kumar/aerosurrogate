@@ -1,0 +1,15 @@
+# Runtime dependencies for the API and the demo page only.
+#
+# Deliberately excludes airfrans, pyvista and VTK (~100 MB) and the dataset
+# itself: the NACA geometry is vendored into naca.py, inference runs in numpy,
+# and the committed artifacts/ and web/test_reference.json carry everything the
+# demo needs. A fresh clone can serve the demo with just these five packages.
+#
+#   pip install -r requirements-serve.txt
+#   uvicorn api:app          ->  http://127.0.0.1:8000
+
+numpy==2.5.4
+torch==2.14.1
+fastapi==0.143.0
+uvicorn==0.54.0
+pydantic==2.14.1

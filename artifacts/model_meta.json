@@ -1,0 +1,132 @@
+{
+  "created_at": "2026-10-13T07:45:38.393282+00:00",
+  "feature_version": "1.0.0",
+  "feature_names": [
+    "max_camber",
+    "x_max_camber",
+    "max_thickness",
+    "alpha_L0_deg",
+    "te_camber_slope",
+    "is_5digit",
+    "aoa_deg",
+    "aoa_eff_sq",
+    "log10_reynolds"
+  ],
+  "target_names": [
+    "cl",
+    "cd"
+  ],
+  "target_transform": {
+    "cl": "identity",
+    "cd": "log"
+  },
+  "arch": {
+    "n_in": 9,
+    "hidden": [
+      128,
+      128,
+      128
+    ],
+    "n_out": 2,
+    "activation": "silu",
+    "n_parameters": 34562
+  },
+  "train": {
+    "split_seed": 1234,
+    "epoch_selection": "5-fold cross-validation over all training rows",
+    "loss": "huber",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch": "full",
+    "max_epochs": 2000,
+    "cv": {
+      "n_folds": 5,
+      "n_restarts": 10,
+      "chosen_epochs": 318,
+      "selection_metric": "mean absolute error, standardised target space",
+      "loss": "huber",
+      "cv_val_mae_at_choice": 0.05461378776121373,
+      "cv_val_mae_spread": 0.017085254570407483,
+      "smoothing_window": 51
+    },
+    "per_seed": [
+      {
+        "seed": 0,
+        "epochs": 318,
+        "final_train_mse": 0.01091036107391119
+      },
+      {
+        "seed": 1,
+        "epochs": 318,
+        "final_train_mse": 0.011015791445970535
+      },
+      {
+        "seed": 2,
+        "epochs": 318,
+        "final_train_mse": 0.010919853113591671
+      },
+      {
+        "seed": 3,
+        "epochs": 318,
+        "final_train_mse": 0.011117772199213505
+      },
+      {
+        "seed": 4,
+        "epochs": 318,
+        "final_train_mse": 0.011194628663361073
+      }
+    ]
+  },
+  "data": {
+    "path": "C:\\Users\\HP\\Desktop\\AeroSurrogate\\data\\coeffs.parquet",
+    "sha256": "d148a998a676c58ea85b97d4b1ef1b5c98d4594c4de73804d3dc7c5917f6794c",
+    "n_rows": 400,
+    "n_train": 200,
+    "n_test": 200,
+    "task": "AirfRANS scarce",
+    "synthetic": false
+  },
+  "input_ranges": {
+    "max_camber": [
+      0.0,
+      0.06975999984292212
+    ],
+    "x_max_camber": [
+      0.0,
+      0.694240373315683
+    ],
+    "max_thickness": [
+      0.050085922109030935,
+      0.19946358437350495
+    ],
+    "alpha_L0_deg": [
+      -8.840568112017877,
+      -0.0
+    ],
+    "te_camber_slope": [
+      -0.30454825430498494,
+      0.0
+    ],
+    "is_5digit": [
+      0.0,
+      1.0
+    ],
+    "aoa_deg": [
+      -4.79,
+      14.837
+    ],
+    "aoa_eff_sq": [
+      0.00016620230541236175,
+      414.30844302677497
+    ],
+    "log10_reynolds": [
+      6.304744543142632,
+      6.774998624108366
+    ]
+  },
+  "versions": {
+    "python": "3.12.13",
+    "torch": "2.14.1+cpu",
+    "numpy": "2.5.4"
+  }
+}

@@ -1,0 +1,24 @@
+[PASS] rows present  n=400
+[PASS] names unique
+[PASS] no NaNs  offenders=[]
+[PASS] test split complete  n=200
+[PASS] train split complete  n=200
+[PASS] splits disjoint
+[PASS] scarce_train subset of full_train
+[PASS] cl in [-1.5, 2.5]  range=[-0.4872, 1.8933]
+[PASS] cd strictly positive and small  range=[0.007204, 0.045949]
+[PASS] Re in [2.0e6, 6.0e6]  range=[2.0172e+06, 5.9752e+06]
+[PASS] aoa in [-5, 15] deg  range=[-4.940, 14.837]
+[PASS] cd == cd_p + cd_v
+[PASS] cl == cl_p + cl_v
+[PASS] 5-digit Q is binary  values=[np.float64(0.0), np.float64(1.0)]
+[PASS] P == 0 sections are described as uncambered  n=48 of 200 four-digit rows
+[PASS] no 4-digit P in the numerically unstable (0, 0.05) band
+[PASS] zero camber implies zero zero-lift angle
+[PASS] max_thickness == thickness_pct/100
+[PASS] reconstructed geometry matches mesh  max=4.05e-04 chord
+[PASS] lift correlates with incidence  pearson r=0.9424
+
+series split: 200 four-digit, 200 five-digit
+viscous share of drag: mean 61.7%
+viscous share of lift: mean 0.047%

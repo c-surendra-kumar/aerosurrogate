@@ -1,0 +1,28 @@
+# The dataset is streamed, never stored -- but the staging directory and the
+# derived parquet live here, and nothing under data/ belongs in the repo.
+data/
+
+# Environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Mesh and archive files, in case anything is ever extracted by hand
+*.zip
+*.vtu
+*.vtp
+
+# OS noise
+Thumbs.db
+.DS_Store
+
+# Deliberately NOT ignored, because they are the deliverables and total well
+# under 1 MB -- they are what let a fresh clone run the demo with no dataset:
+#   artifacts/model.pt, artifacts/model_meta.json
+#   web/test_reference.json
+#   results/*.png, results/metrics.json, results/examples.md
+
+# local tooling config
+.claude/

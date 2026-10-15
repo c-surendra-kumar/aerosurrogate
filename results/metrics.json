@@ -1,0 +1,362 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-13T07:46:07.328833+00:00",
+  "data": {
+    "path": "C:\\Users\\HP\\Desktop\\AeroSurrogate\\data\\coeffs.parquet",
+    "n_test": 200,
+    "n_train": 200,
+    "task": "AirfRANS scarce (200 train / 200 test)",
+    "synthetic": false
+  },
+  "feature_version": "1.0.0",
+  "feature_names": [
+    "max_camber",
+    "x_max_camber",
+    "max_thickness",
+    "alpha_L0_deg",
+    "te_camber_slope",
+    "is_5digit",
+    "aoa_deg",
+    "aoa_eff_sq",
+    "log10_reynolds"
+  ],
+  "target_transform": {
+    "cl": "identity",
+    "cd": "log"
+  },
+  "model_meta": {
+    "arch": {
+      "n_in": 9,
+      "hidden": [
+        128,
+        128,
+        128
+      ],
+      "n_out": 2,
+      "activation": "silu",
+      "n_parameters": 34562
+    },
+    "train": {
+      "split_seed": 1234,
+      "epoch_selection": "5-fold cross-validation over all training rows",
+      "loss": "huber",
+      "lr": 0.001,
+      "weight_decay": 0.0001,
+      "batch": "full",
+      "max_epochs": 2000,
+      "cv": {
+        "n_folds": 5,
+        "n_restarts": 10,
+        "chosen_epochs": 318,
+        "selection_metric": "mean absolute error, standardised target space",
+        "loss": "huber",
+        "cv_val_mae_at_choice": 0.05461378776121373,
+        "cv_val_mae_spread": 0.017085254570407483,
+        "smoothing_window": 51
+      },
+      "per_seed": [
+        {
+          "seed": 0,
+          "epochs": 318,
+          "final_train_mse": 0.01091036107391119
+        },
+        {
+          "seed": 1,
+          "epochs": 318,
+          "final_train_mse": 0.011015791445970535
+        },
+        {
+          "seed": 2,
+          "epochs": 318,
+          "final_train_mse": 0.010919853113591671
+        },
+        {
+          "seed": 3,
+          "epochs": 318,
+          "final_train_mse": 0.011117772199213505
+        },
+        {
+          "seed": 4,
+          "epochs": 318,
+          "final_train_mse": 0.011194628663361073
+        }
+      ]
+    },
+    "input_ranges": {
+      "max_camber": [
+        0.0,
+        0.06975999984292212
+      ],
+      "x_max_camber": [
+        0.0,
+        0.694240373315683
+      ],
+      "max_thickness": [
+        0.050085922109030935,
+        0.19946358437350495
+      ],
+      "alpha_L0_deg": [
+        -8.840568112017877,
+        -0.0
+      ],
+      "te_camber_slope": [
+        -0.30454825430498494,
+        0.0
+      ],
+      "is_5digit": [
+        0.0,
+        1.0
+      ],
+      "aoa_deg": [
+        -4.79,
+        14.837
+      ],
+      "aoa_eff_sq": [
+        0.00016620230541236175,
+        414.30844302677497
+      ],
+      "log10_reynolds": [
+        6.304744543142632,
+        6.774998624108366
+      ]
+    }
+  },
+  "models": {
+    "linear": {
+      "cl": {
+        "mae": 0.020450925337816533,
+        "rmse": 0.02844316965229849,
+        "r2": 0.9975887473412265,
+        "mean_rel_err_pct": 5.177600480031094,
+        "n_excluded_from_rel_err": 10,
+        "normalised_err_pct": 2.724919770156658,
+        "max_abs_err": 0.1356347781111869,
+        "worst_case": "airFoil2D_SST_75.101_-3.321_6.728_6.938_17.749",
+        "bootstrap_mae_ci95": [
+          0.017795044706205024,
+          0.023317747776282722
+        ]
+      },
+      "cd": {
+        "mae": 0.0007926509686228897,
+        "rmse": 0.0013418403981367067,
+        "r2": 0.9193862851232968,
+        "mean_rel_err_pct": 5.851814698693266,
+        "n_excluded_from_rel_err": 0,
+        "normalised_err_pct": 6.2648282667776005,
+        "max_abs_err": 0.008114685056579321,
+        "worst_case": "airFoil2D_SST_52.518_12.114_1.135_6.268_0.0_5.676",
+        "bootstrap_mae_ci95": [
+          0.0006501533002717367,
+          0.000954075927532699
+        ]
+      }
+    },
+    "mlp": {
+      "cl": {
+        "mae": 0.009047734405312029,
+        "rmse": 0.012836388950303385,
+        "r2": 0.9995088971300089,
+        "mean_rel_err_pct": 2.296786957385946,
+        "n_excluded_from_rel_err": 10,
+        "normalised_err_pct": 1.2055371553565892,
+        "max_abs_err": 0.05336088957962937,
+        "worst_case": "airFoil2D_SST_78.501_14.686_1.641_0.0_17.637",
+        "bootstrap_mae_ci95": [
+          0.007816977541705525,
+          0.010355441920182201
+        ]
+      },
+      "cd": {
+        "mae": 0.00030310623579126307,
+        "rmse": 0.0006022695702330456,
+        "r2": 0.9837598868359994,
+        "mean_rel_err_pct": 2.1557064018215732,
+        "n_excluded_from_rel_err": 0,
+        "normalised_err_pct": 2.395642709073737,
+        "max_abs_err": 0.004804003298605267,
+        "worst_case": "airFoil2D_SST_52.518_12.114_1.135_6.268_0.0_5.676",
+        "bootstrap_mae_ci95": [
+          0.00023630018415974412,
+          0.0003798689903679627
+        ]
+      }
+    },
+    "mean": {
+      "cl": {
+        "mae": 0.49752575656686493,
+        "rmse": 0.5792718282413203,
+        "r2": -0.00011870995909268878,
+        "mean_rel_err_pct": 147.84516406020117,
+        "n_excluded_from_rel_err": 10,
+        "normalised_err_pct": 66.29126789311059,
+        "max_abs_err": 1.1872861628938838,
+        "worst_case": "airFoil2D_SST_39.497_-4.94_0.473_3.219_1.0_16.447",
+        "bootstrap_mae_ci95": [
+          0.45621259050816615,
+          0.539064642697783
+        ]
+      },
+      "cd": {
+        "mae": 0.0033521335650531867,
+        "rmse": 0.004750993893538435,
+        "r2": -0.010592692902854806,
+        "mean_rel_err_pct": 25.1837559441622,
+        "n_excluded_from_rel_err": 0,
+        "normalised_err_pct": 26.494058474241715,
+        "max_abs_err": 0.02324413460847791,
+        "worst_case": "airFoil2D_SST_32.432_14.036_6.578_2.722_5.928",
+        "bootstrap_mae_ci95": [
+          0.0029014405161997305,
+          0.0038483626967730287
+        ]
+      }
+    }
+  },
+  "comparison_linear_vs_mlp": {
+    "cl": {
+      "mae_delta": 0.011403190932504505,
+      "ci95": [
+        0.0088201325648757,
+        0.014099191659595096
+      ],
+      "win_fraction": 1.0,
+      "significant": true
+    },
+    "cd": {
+      "mae_delta": 0.0004895447328316266,
+      "ci95": [
+        0.0003811860202502979,
+        0.0006096866129953543
+      ],
+      "win_fraction": 1.0,
+      "significant": true
+    }
+  },
+  "acceptance": {
+    "mlp_beats_linear_cl": true,
+    "mlp_beats_linear_cd": true,
+    "cl_win_significant": true,
+    "cd_win_significant": true
+  },
+  "lift_curve": {
+    "airfoil": "airFoil2D_SST_64.171_10.66_1.42_3.551_11.686",
+    "naca": [
+      1.42,
+      3.551,
+      11.686
+    ],
+    "reynolds": 4113525.6410256415,
+    "modelled_slope_per_deg": 0.107252668694823,
+    "thin_airfoil_slope_per_deg": 0.10966227112321508,
+    "slope_ratio": 0.9780270606863076
+  },
+  "latency": {
+    "torch_threads": 1,
+    "n_warmup": 100,
+    "n_measured": 1000,
+    "batch_size": 1,
+    "ensemble_members": 5,
+    "feature_build": {
+      "median_ms": 0.0069,
+      "p95_ms": 0.0146,
+      "mean_ms": 0.010654
+    },
+    "forward_only": {
+      "median_ms": 0.2066,
+      "p95_ms": 0.405925,
+      "mean_ms": 0.244587
+    },
+    "end_to_end": {
+      "median_ms": 0.2193,
+      "p95_ms": 0.48421999999999976,
+      "mean_ms": 0.26318539999999996
+    }
+  },
+  "cfd_reference": {
+    "minutes_per_simulation": 25.0,
+    "cores": 16,
+    "core_hours": 6.666666666666667,
+    "source": "Bonnet et al., AirfRANS, NeurIPS 2022 D&B, arXiv:2212.07564, Table 4"
+  },
+  "speedup": {
+    "wall_clock_ratio": 6839945.280437756,
+    "core_hour_ratio": 109439124.4870041,
+    "caveat": "Compares a 16-core RANS field solve against a single-threaded two-scalar inference. CFD produces the entire flow field; the surrogate produces two numbers."
+  },
+  "extrapolation_aoa": {
+    "band_deg": [
+      -2.5,
+      12.5
+    ],
+    "n_train_in_band": 162,
+    "n_test_inside": 159,
+    "n_test_outside": 41,
+    "prediction_registered_before_running": "Cl degrades mildly, Cd degrades badly",
+    "interpolation": {
+      "cl": {
+        "mae": 0.006991273225034475,
+        "rmse": 0.010028998683704425,
+        "r2": 0.9995678197444875,
+        "mean_rel_err_pct": 1.8287247493381569,
+        "n_excluded_from_rel_err": 9,
+        "normalised_err_pct": 0.966399348449764,
+        "max_abs_err": 0.045148388860752675,
+        "worst_case": "airFoil2D_SST_52.518_12.114_1.135_6.268_0.0_5.676",
+        "bootstrap_mae_ci95": [
+          0.005905664346997541,
+          0.008165681571801201
+        ]
+      },
+      "cd": {
+        "mae": 0.000228602725706173,
+        "rmse": 0.0006317411811715257,
+        "r2": 0.9582401459367391,
+        "mean_rel_err_pct": 1.6330295291185934,
+        "n_excluded_from_rel_err": 0,
+        "normalised_err_pct": 1.9480143584297,
+        "max_abs_err": 0.005885011020357687,
+        "worst_case": "airFoil2D_SST_52.518_12.114_1.135_6.268_0.0_5.676",
+        "bootstrap_mae_ci95": [
+          0.00015115336696270226,
+          0.00033366702064772295
+        ]
+      }
+    },
+    "extrapolation": {
+      "cl": {
+        "mae": 0.020752088401233826,
+        "rmse": 0.02628541990549621,
+        "r2": 0.9990585570409437,
+        "mean_rel_err_pct": 6.66914653529183,
+        "n_excluded_from_rel_err": 1,
+        "normalised_err_pct": 2.4256395400473547,
+        "max_abs_err": 0.06886008347648342,
+        "worst_case": "airFoil2D_SST_39.497_-4.94_0.473_3.219_1.0_16.447",
+        "bootstrap_mae_ci95": [
+          0.01613368017472578,
+          0.026103846753934748
+        ]
+      },
+      "cd": {
+        "mae": 0.0005745678067818644,
+        "rmse": 0.0008843537736089524,
+        "r2": 0.9860280777302357,
+        "mean_rel_err_pct": 3.290127089941434,
+        "n_excluded_from_rel_err": 0,
+        "normalised_err_pct": 3.544644062174961,
+        "max_abs_err": 0.0032409716995148857,
+        "worst_case": "airFoil2D_SST_35.44_14.039_5.196_1.691_9.27",
+        "bootstrap_mae_ci95": [
+          0.0003885515424644647,
+          0.0007931792387697396
+        ]
+      }
+    },
+    "degradation_ratio": {
+      "cl": 2.9682845646661873,
+      "cd": 2.5133900088329053
+    }
+  },
+  "not_comparable_to_paper": "This is a 9-parameter -> (Cl, Cd) regression against AirfRANS' own integrated coefficients, not the AirfRANS benchmark task of predicting p and u at every mesh node. The paper's baselines are not comparable."
+}
